@@ -3,10 +3,11 @@ import { View, Text, Pressable, Image } from "react-native";
 import MasonryList from "@react-native-seoul/masonry-list";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
-import { mealData } from "../helpers";
+import { useNavigation } from "@react-navigation/native";
 import Loading from "./Loading";
 
 export default function Recipe({ categories, meals }) {
+  const navigation = useNavigation();
   return (
     <View className="space-y-3">
       <Text
@@ -24,7 +25,9 @@ export default function Recipe({ categories, meals }) {
             keyExtractor={(item) => item.idMeal}
             numColumns={2}
             showsVerticalScrollIndicator={false}
-            renderItem={({ item, i }) => <RecipeCard item={item} index={i} />}
+            renderItem={({ item, i }) => (
+              <RecipeCard item={item} index={i} navigation={navigation} />
+            )}
             onEndReachedThreshold={0.1}
           />
         )}
@@ -33,7 +36,7 @@ export default function Recipe({ categories, meals }) {
   );
 }
 
-const RecipeCard = ({ item, index }) => {
+const RecipeCard = ({ item, index, navigation }) => {
   const isEven = index % 2 === 0;
   return (
     <Animated.View
@@ -48,15 +51,17 @@ const RecipeCard = ({ item, index }) => {
           paddingLeft: isEven ? 0 : 8,
           paddingRight: isEven ? 8 : 0,
         }}
+        onPress={() => navigation.navigate("RecipeDetails", { ...item })}
         className="flex justify-center mb-4 space-y-1"
       >
-        <Image
+        <Animated.Image
           source={{ uri: item.strMealThumb }}
           style={{
             width: "100%",
             height: index % 3 === 0 ? hp(25) : hp(35),
             borderRadius: 35,
           }}
+          sharedTransitionTag={item.strMeal}
           className="bg-black/5"
         />
         <Text

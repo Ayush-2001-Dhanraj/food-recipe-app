@@ -40,7 +40,6 @@ export default function HomeScreen() {
       const response = await axios.get(
         `https://themealdb.com/api/json/v1/1/filter.php?c=${category}`
       );
-      console.log(response.data.meals.length);
       setMeals(response.data.meals);
     } catch (error) {
       console.log(error);
