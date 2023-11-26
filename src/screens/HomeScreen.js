@@ -6,14 +6,51 @@ import {
   Image,
   TextInput,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { BellIcon, MagnifyingGlassIcon } from "react-native-heroicons/outline";
 import Categories from "../components/Categories";
+import axios from "axios";
+import Recipe from "../components/Recipe";
 
 export default function HomeScreen() {
   const [activeCategory, setActiveCategory] = useState("Beef");
+  const [categories, setCategories] = useState([]);
+  const [meals, setMeals] = useState([]);
+
+  useEffect(() => {
+    getCategoriesData();
+    getRecepies();
+  }, []);
+
+  const getCategoriesData = async () => {
+    try {
+      const response = await axios.get(
+        "https://themealdb.com/api/json/v1/1/categories.php"
+      );
+      setCategories(response.data.categories);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getRecepies = async (category = "Beef") => {
+    try {
+      const response = await axios.get(
+        `https://themealdb.com/api/json/v1/1/filter.php?c=${category}`
+      );
+      console.log(response.data.meals.length);
+      setMeals(response.data.meals);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleCategoryChange = (category) => {
+    getRecepies(category);
+    setActiveCategory(category);
+  };
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -67,11 +104,19 @@ export default function HomeScreen() {
         </View>
 
         {/* categories */}
+        <View className="mb-4">
+          {categories.length > 0 && (
+            <Categories
+              categories={categories}
+              activeCategory={activeCategory}
+              handleCategoryChange={handleCategoryChange}
+            />
+          )}
+        </View>
+
+        {/* recipes */}
         <View>
-          <Categories
-            activeCategory={activeCategory}
-            setActiveCategory={setActiveCategory}
-          />
+          {meals.length > 0 && <Recipe categories={categories} meals={meals} />}
         </View>
       </ScrollView>
     </SafeAreaView>
